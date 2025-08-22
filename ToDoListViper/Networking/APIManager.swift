@@ -11,7 +11,7 @@ final class APIManager: Sendable {
 
     typealias NetworkResponse = (data: Data, response: URLResponse)
 
-    static let shared = APIManager(baseURL: "https://dummyjson.com")
+    static let shared = APIManager(baseURL: Constants.baseURL)
     
     private let baseURL: String
     private let session = URLSession.shared
@@ -69,7 +69,7 @@ private extension APIManager {
         return nil
     }
 
-    func createRequest(from endpoint: any Endpoint, contentType: String = "application/json") throws -> URLRequest {
+    func createRequest(from endpoint: any Endpoint) throws -> URLRequest {
         guard Reachability.isConnectedToNetwork() else {
             throw APIError.noInternetConnection
         }
@@ -80,8 +80,12 @@ private extension APIManager {
         
         var request = URLRequest(url: urlPath)
         request.httpMethod = endpoint.method.rawValue
-        request.setValue(contentType, forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         return request
      }
 }
 
+private enum Constants {
+    
+    static let baseURL = "https://dummyjson.com"
+}

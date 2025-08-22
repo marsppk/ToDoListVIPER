@@ -12,6 +12,8 @@ enum ToDoListEndpoint: Sendable {
     case getTasks
 }
 
+// MARK: - Endpoint
+
 extension ToDoListEndpoint: Endpoint {
     
     var path: String {

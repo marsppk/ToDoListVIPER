@@ -12,11 +12,15 @@ extension Notification.Name {
     static let didUpdateTask = Notification.Name("didUpdateTask")
 }
 
-class CoreDataManager {
+final class CoreDataManager {
+    
+    // MARK: - Type Properties
 
     static let shared = CoreDataManager()
     
-    lazy var persistentContainer: NSPersistentContainer = {
+    // MARK: - Private Properties
+    
+    private lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "ToDoListViper")
         container.loadPersistentStores { description, error in
             if let error = error {
@@ -26,9 +30,11 @@ class CoreDataManager {
         return container
     }()
     
-    var context: NSManagedObjectContext {
+    private var context: NSManagedObjectContext {
         return persistentContainer.viewContext
     }
+    
+    // MARK: - Internal Methods
     
     func backgroundContext() -> NSManagedObjectContext {
         return persistentContainer.newBackgroundContext()
@@ -90,6 +96,8 @@ class CoreDataManager {
             print("Error deleting task: \(error)")
         }
     }
+    
+    // MARK: - Private Methods
     
     private func saveContext() {
         if context.hasChanges {

@@ -7,11 +7,15 @@
 
 struct TaskDTO: Codable {
     
+    // MARK: - Nested types
+    
     enum CodingKeys: String, CodingKey {
         case id
         case description = "todo"
         case isCompleted = "completed"
     }
+    
+    // MARK: - Properties
     
     let id: Int
     let description: String

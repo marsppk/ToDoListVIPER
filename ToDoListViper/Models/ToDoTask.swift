@@ -17,6 +17,8 @@ struct ToDoTask {
     var isCompleted: Bool
     let creationDate: Date
     
+    // MARK: - Initializers
+    
     init(id: Int, title: String, description: String, isCompleted: Bool, creationDate: Date) {
         self.id = id
         self.title = title

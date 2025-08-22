@@ -15,41 +15,35 @@ protocol TaskEditionInteractorProtocol: AnyObject {
 
 final class TaskEditionInteractor: TaskEditionInteractorProtocol {
     
+    // MARK: - Private Properties
+    
     private let backgroundContext = CoreDataManager.shared.backgroundContext()
     private let currentTask: ToDoTask?
     private let nextID: Int
+    
+    // MARK: - Initializers
     
     init(currentTask: ToDoTask?, nextID: Int) {
         self.currentTask = currentTask
         self.nextID = nextID
     }
     
+    // MARK: - Internal Methods
+    
     func saveTask(title: String, description: String) {
         guard !description.isEmpty else { return }
-
-        if let currentTask {
-            backgroundContext.perform {
-                let updatedTask = ToDoTask(
-                    id: currentTask.id,
-                    title: title.isEmpty ? "Задача \(currentTask.id)" : title,
-                    description: description,
-                    isCompleted: currentTask.isCompleted,
-                    creationDate: currentTask.creationDate
-                )
-                CoreDataManager.shared.updateTask(updatedTask)
-            }
-        } else {
-            backgroundContext.perform { [weak self] in
-                guard let self else { return }
-                let newTask = ToDoTask(
-                    id: self.nextID,
-                    title: title.isEmpty ? "Задача \(self.nextID)" : title,
-                    description: description,
-                    isCompleted: false,
-                    creationDate: .now
-                )
-                CoreDataManager.shared.saveTask(newTask)
-            }
+        
+        backgroundContext.perform { [weak self] in
+            guard let self else { return }
+            let task = ToDoTask(
+                id: currentTask?.id ?? self.nextID,
+                title: title.isEmpty ? "Задача \(self.nextID)" : title,
+                description: description,
+                isCompleted: currentTask?.isCompleted ?? false,
+                creationDate: currentTask?.creationDate ?? .now
+            )
+            
+            currentTask == nil ? CoreDataManager.shared.saveTask(task) : CoreDataManager.shared.updateTask(task)
         }
     }
     

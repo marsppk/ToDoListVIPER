@@ -9,7 +9,11 @@ import Foundation
 
 final class CreationDateFormatter {
     
+    // MARK: - Type Properties
+    
     static let shared = CreationDateFormatter()
+    
+    // MARK: - Internal Methods
     
     func formatDate(_ date: Date) -> String {
         let dateFormatter = DateFormatter()

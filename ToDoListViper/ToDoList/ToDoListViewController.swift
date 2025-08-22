@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ToDoListViewController: UIViewController {
+class ToDoListViewController: UIViewController, UITableViewDelegate {
 
     // MARK: - Internal Properties
 
@@ -47,14 +47,13 @@ class ToDoListViewController: UIViewController {
     private func setupView() {
         navigationController?.overrideUserInterfaceStyle = .dark
         overrideUserInterfaceStyle = .dark
+        view.addSubview(toDoListTableView)
     }
 
     private func setupToDoListTableView() {
         toDoListTableView.dataSource = self
         toDoListTableView.delegate = self
         toDoListTableView.register(ToDoListTaskViewCell.self, forCellReuseIdentifier: ToDoListTaskViewCell.identifier)
-
-        view.addSubview(toDoListTableView)
 
         toDoListTableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -69,7 +68,7 @@ class ToDoListViewController: UIViewController {
         tasksCountText.isEnabled = false
         tasksCountText.setTitleTextAttributes(
             [
-                NSAttributedString.Key.font : UIFont.systemFont(ofSize: 11),
+                NSAttributedString.Key.font : UIFont.systemFont(ofSize: Constants.tasksCountTextFontSize),
                 NSAttributedString.Key.foregroundColor : UIColor.white
             ],
             for: .disabled
@@ -82,7 +81,7 @@ class ToDoListViewController: UIViewController {
         )
 
         let addButton = UIBarButtonItem(
-            image: UIImage(systemName: "square.and.pencil"),
+            image: UIImage(systemName: Constants.addImageName),
             style: .plain,
             target: self,
             action: #selector(addTaskTapped)
@@ -110,7 +109,7 @@ class ToDoListViewController: UIViewController {
     private func setupSearchController() {
         searchController.searchResultsUpdater = self
         searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchBar.placeholder = "Search"
+        searchController.searchBar.placeholder = Constants.searchPlaceholder
         navigationItem.searchController = searchController
     }
     
@@ -149,33 +148,56 @@ extension ToDoListViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
-        UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, actionProvider: { _ in
-            let edit = UIAction(
-                title: "Редактировать",
-                image: UIImage(systemName: "square.and.pencil")) { _ in
-                    self.presenter.shouldOpenTaskEdition(currentTask: self.presenter.getCurrentTask(by: indexPath))
-                }
-            let share = UIAction(
-                title: "Поделиться",
-                image: UIImage(systemName: "square.and.arrow.up")) { _ in
-                    self.presenter.shouldOpenActivityViewController(at: indexPath)
-                }
-            let delete = UIAction(
-                title: "Удалить",
-                image: UIImage(systemName: "trash"),
-                attributes: .destructive
-            ) { _ in
-                    self.presenter.deleteItem(at: indexPath)
-                }
-            return UIMenu(children: [edit, share, delete])
-        })
+        UIContextMenuConfiguration(
+            identifier: indexPath as NSIndexPath,
+            previewProvider: nil,
+            actionProvider: { [weak self] _ in
+                guard let self = self else { return nil }
+                
+                let actions = self.createContextMenuActions(for: indexPath)
+                return UIMenu(children: actions)
+            }
+        )
     }
-}
 
-// MARK: - UITableViewDelegate
+    private func createContextMenuActions(for indexPath: IndexPath) -> [UIAction] {
+        let editAction = createEditAction(for: indexPath)
+        let shareAction = createShareAction(for: indexPath)
+        let deleteAction = createDeleteAction(for: indexPath)
+        
+        return [editAction, shareAction, deleteAction]
+    }
 
-extension ToDoListViewController: UITableViewDelegate {
+    private func createEditAction(for indexPath: IndexPath) -> UIAction {
+        UIAction(
+            title: Constants.editButtonTitle,
+            image: UIImage(systemName: Constants.editImageName),
+            handler: { [weak self] _ in
+                self?.presenter.shouldOpenTaskEdition(currentTask: self?.presenter.getCurrentTask(by: indexPath))
+            }
+        )
+    }
 
+    private func createShareAction(for indexPath: IndexPath) -> UIAction {
+        UIAction(
+            title: Constants.shareButtonTitle,
+            image: UIImage(systemName: Constants.shareImageName),
+            handler: { [weak self] _ in
+                self?.presenter.shouldOpenActivityViewController(at: indexPath)
+            }
+        )
+    }
+
+    private func createDeleteAction(for indexPath: IndexPath) -> UIAction {
+        UIAction(
+            title: Constants.deleteButtonTitle,
+            image: UIImage(systemName: Constants.deleteImageName),
+            attributes: .destructive,
+            handler: { [weak self] _ in
+                self?.presenter.deleteItem(at: indexPath)
+            }
+        )
+    }
 }
 
 // MARK: - ToDoListViewProtocol
@@ -199,6 +221,8 @@ extension ToDoListViewController: ToDoListViewProtocol {
     }
 }
 
+// MARK: - UISearchResultsUpdating
+
 extension ToDoListViewController: UISearchResultsUpdating {
 
     func updateSearchResults(for searchController: UISearchController) {
@@ -210,4 +234,13 @@ extension ToDoListViewController: UISearchResultsUpdating {
 
 private enum Constants {
 
+    static let tasksCountTextFontSize: CGFloat = 11.0
+    static let addImageName = "square.and.pencil"
+    static let searchPlaceholder = "Search"
+    static let editButtonTitle = "Редактировать"
+    static let editImageName = "square.and.pencil"
+    static let shareButtonTitle = "Поделиться"
+    static let shareImageName = "square.and.arrow.up"
+    static let deleteButtonTitle = "Удалить"
+    static let deleteImageName = "trash"
 }

@@ -7,7 +7,8 @@
 
 import Foundation
 
-public enum APIError: LocalizedError, Equatable, Sendable {
+enum APIError: LocalizedError, Equatable, Sendable {
+
     case noInternetConnection
     case invalidPath
     case requestError

@@ -14,8 +14,12 @@ protocol ToDoListRouterProtocol: AnyObject {
 }
 
 final class ToDoListRouter: ToDoListRouterProtocol {
+    
+    // MARK: - Internal Properties
 
     weak var viewController: UIViewController?
+    
+    // MARK: - Internal Methods
 
     func openTaskEdition(currentTask: ToDoTask?, nextID: Int) {
         configurateBackButton()
@@ -30,10 +34,19 @@ final class ToDoListRouter: ToDoListRouterProtocol {
         let activityViewController = UIActivityViewController(activityItems: [text], applicationActivities: nil)
         viewController?.present(activityViewController, animated: true)
     }
+    
+    // MARK: - Private Methods
 
     private func configurateBackButton() {
         let backItem = UIBarButtonItem()
-        backItem.title = "Назад"
+        backItem.title = Constants.backButtonTitle
         viewController?.navigationItem.backBarButtonItem = backItem
     }
+}
+
+// MARK: - Constants
+
+private enum Constants {
+    
+    static let backButtonTitle = "Назад"
 }

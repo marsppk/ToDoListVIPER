@@ -15,11 +15,24 @@ protocol ToDoListInteractorProtocol: AnyObject {
     func getCurrentTask(index: Int) -> ToDoTask?
 }
 
-final class ToDoListInteractor: ToDoListInteractorProtocol {
+protocol ToDoListPresenterOutput: AnyObject {
 
+    func didFetchTasks(_ tasks: [ToDoTask])
+    func didUpdateTask(task: ToDoTask, at index: Int)
+}
+
+final class ToDoListInteractor: ToDoListInteractorProtocol {
+    
+    // MARK: - Private Properties
+    
     private let backgroundContext = CoreDataManager.shared.backgroundContext()
-    weak var presenter: ToDoListPresenterOutput?
     private var tasks: [ToDoTask] = []
+    
+    // MARK: - Internal Properties
+    
+    weak var presenter: ToDoListPresenterOutput?
+    
+    // MARK: - Internal Methods
 
     func fetchTasks() {
         backgroundContext.perform { [weak self] in
@@ -56,6 +69,8 @@ final class ToDoListInteractor: ToDoListInteractorProtocol {
         tasks[index]
     }
     
+    // MARK: - Private Methods
+    
     private func getTasksFromAPI() {
         APIManager.shared.getData(from: ToDoListEndpoint.getTasks) { [weak self] (result: Result<ToDoListDTO?, any Error>) in
             guard let self else { return }
@@ -75,10 +90,4 @@ final class ToDoListInteractor: ToDoListInteractorProtocol {
             }
         }
     }
-}
-
-protocol ToDoListPresenterOutput: AnyObject {
-
-    func didFetchTasks(_ tasks: [ToDoTask])
-    func didUpdateTask(task: ToDoTask, at index: Int)
 }

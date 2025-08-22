@@ -34,7 +34,7 @@ final class TaskEditionViewController: UIViewController, Configurable {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .black
+        setupView()
         setupKeyboardObservers()
         setupScrollView()
         setupContainer()
@@ -76,15 +76,25 @@ final class TaskEditionViewController: UIViewController, Configurable {
         )
     }
     
-    private func setupScrollView() {
+    private func setupView() {
+        view.backgroundColor = .black
         view.addSubview(scrollView)
+    }
+    
+    private func setupScrollView() {
         scrollView.addSubview(container)
         
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            scrollView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            scrollView.leadingAnchor.constraint(
+                equalTo: view.safeAreaLayoutGuide.leadingAnchor,
+                constant: Constants.scrollViewHorizontalInset
+            ),
+            scrollView.trailingAnchor.constraint(
+                equalTo: view.safeAreaLayoutGuide.trailingAnchor,
+                constant: -Constants.scrollViewHorizontalInset
+            ),
             scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
     }
@@ -105,46 +115,57 @@ final class TaskEditionViewController: UIViewController, Configurable {
     }
     
     private func setupDateLabel() {
-        dateLabel.font = .systemFont(ofSize: 12)
-        dateLabel.textColor = UIColor(named: "secondaryTextColor")
+        dateLabel.font = .systemFont(ofSize: Constants.dateFontSize)
+        dateLabel.textColor = UIColor.secondaryTextColor
         
         dateLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            dateLabel.topAnchor.constraint(equalTo: taskTitleTextView.bottomAnchor, constant: 8),
+            dateLabel.topAnchor.constraint(
+                equalTo: taskTitleTextView.bottomAnchor,
+                constant: Constants.spacingBetweenTitleAndDate
+            ),
             dateLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             dateLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            dateLabel.bottomAnchor.constraint(equalTo: taskDescriptionTextView.topAnchor, constant: -8)
+            dateLabel.bottomAnchor.constraint(
+                equalTo: taskDescriptionTextView.topAnchor,
+                constant: -Constants.spacingBetweenDateAndDescription
+            )
         ])
     }
 
     private func setupTaskTitleTextView() {
-        taskTitleTextView.font = .systemFont(ofSize: 34, weight: .bold)
+        taskTitleTextView.font = .systemFont(ofSize: Constants.titleFontSize, weight: .bold)
         taskTitleTextView.delegate = self
         taskTitleTextView.returnKeyType = .done
         taskTitleTextView.isScrollEnabled = false
-        taskTitleTextView.textContainer.lineFragmentPadding = 0
+        taskTitleTextView.textContainer.lineFragmentPadding = .zero
 
         taskTitleTextView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             taskTitleTextView.topAnchor.constraint(equalTo: container.topAnchor),
             taskTitleTextView.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             taskTitleTextView.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            taskTitleTextView.heightAnchor.constraint(greaterThanOrEqualToConstant: 42.0)
+            taskTitleTextView.heightAnchor.constraint(
+                greaterThanOrEqualToConstant: Constants.titleTextViewMinHeight
+            )
         ])
     }
     
     private func setupTaskDescriptionTextView() {
-        taskDescriptionTextView.font = .systemFont(ofSize: 16, weight: .regular)
+        taskDescriptionTextView.font = .systemFont(ofSize: Constants.descriptionFontSize, weight: .regular)
         taskDescriptionTextView.delegate = self
         taskDescriptionTextView.returnKeyType = .done
         taskDescriptionTextView.isScrollEnabled = false
-        taskDescriptionTextView.textContainer.lineFragmentPadding = 0
+        taskDescriptionTextView.textContainer.lineFragmentPadding = .zero
 
         taskDescriptionTextView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             taskDescriptionTextView.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             taskDescriptionTextView.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            taskDescriptionTextView.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8)
+            taskDescriptionTextView.bottomAnchor.constraint(
+                equalTo: container.bottomAnchor,
+                constant: -Constants.descriptionBottomInset
+            )
         ])
     }
     
@@ -158,13 +179,15 @@ final class TaskEditionViewController: UIViewController, Configurable {
     }
     
     @objc private func keyboardWillShow(_ notification: Notification) {
-        guard let userInfo = notification.userInfo,
-              let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else {
+        guard
+            let userInfo = notification.userInfo,
+            let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect
+        else {
             return
         }
         
-        let keyboardHeight = keyboardFrame.height - view.safeAreaInsets.bottom + 8
-        let contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardHeight, right: 0)
+        let keyboardHeight = keyboardFrame.height - view.safeAreaInsets.bottom + Constants.descriptionBottomInset
+        let contentInset = UIEdgeInsets(top: .zero, left: .zero, bottom: keyboardHeight, right: .zero)
         
         scrollView.contentInset = contentInset
         scrollView.scrollIndicatorInsets = contentInset
@@ -184,7 +207,9 @@ final class TaskEditionViewController: UIViewController, Configurable {
 extension TaskEditionViewController: UITextViewDelegate {
 
     func textViewDidBeginEditing(_ textView: UITextView) {
-        let placeholder = textView === taskTitleTextView ? "Название" : "Описание"
+        let placeholder = textView === taskTitleTextView
+            ? Constants.titleTextViewPlaceholder
+            : Constants.descriptionTextViewPlaceholder
         if textView.text == placeholder && textView.isFirstResponder {
             textView.text = ""
             textView.textColor = .white
@@ -192,7 +217,9 @@ extension TaskEditionViewController: UITextViewDelegate {
     }
 
     func textViewDidEndEditing(_ textView: UITextView) {
-        let placeholder = textView === taskTitleTextView ? "Название" : "Описание"
+        let placeholder = textView === taskTitleTextView
+            ? Constants.titleTextViewPlaceholder
+            : Constants.descriptionTextViewPlaceholder
         if textView.text.isEmpty {
             textView.text = placeholder
             textView.textColor = .lightGray
@@ -204,32 +231,28 @@ extension TaskEditionViewController: TaskEditionViewProtocol {
     
     func apply(configuration: Configuration) {
         dateLabel.text = configuration.date
-        if configuration.title.isEmpty {
-            taskDescriptionTextView.text = "Описание"
-            taskDescriptionTextView.textColor = .lightGray
-        } else {
-            taskDescriptionTextView.text = configuration.description
-            taskDescriptionTextView.textColor = .white
-        }
-        if configuration.description.isEmpty {
-            taskTitleTextView.text = "Название"
-            taskTitleTextView.textColor = .lightGray
-        } else {
-            taskTitleTextView.text = configuration.title
-            taskTitleTextView.textColor = .white
-        }
+        taskDescriptionTextView.text = configuration.title.isEmpty
+            ? Constants.descriptionTextViewPlaceholder
+            : configuration.description
+        taskDescriptionTextView.textColor = configuration.title.isEmpty ? .lightGray : .white
+        taskTitleTextView.text = configuration.description.isEmpty
+            ? Constants.titleTextViewPlaceholder
+            : configuration.title
+        taskTitleTextView.textColor = configuration.description.isEmpty ? .lightGray : .white
     }
 }
 
-extension UIViewController {
-
-    func hideKeyboardWhenTappedAround() {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(UIViewController.dismissKeyboard))
-        tap.cancelsTouchesInView = false
-        view.addGestureRecognizer(tap)
-    }
-
-    @objc private func dismissKeyboard() {
-        view.endEditing(true)
-    }
+private enum Constants {
+    
+    static let titleTextViewPlaceholder = "Название"
+    static let descriptionTextViewPlaceholder = "Описание"
+    static let scrollViewHorizontalInset: CGFloat = 20
+    static let titleTextViewMinHeight: CGFloat = 42
+    static let spacingBetweenTitleAndDate: CGFloat = 8
+    static let spacingBetweenDateAndDescription: CGFloat = 8
+    static let descriptionBottomInset: CGFloat = 8
+    static let keyboardAnimationDuration: TimeInterval = 0.3
+    static let titleFontSize: CGFloat = 34
+    static let dateFontSize: CGFloat = 12
+    static let descriptionFontSize: CGFloat = 16
 }

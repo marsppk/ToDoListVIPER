@@ -16,8 +16,13 @@ protocol ToDoListViewProtocol: AnyObject {
 }
 
 protocol ToDoListPresenterProtocol: AnyObject {
+    
+    // MARK: - Properties
 
     var tasksCount: Int { get }
+    
+    // MARK: - Methods
+    
     func viewDidLoad()
     func updateData()
     func getCellConfiguration(for indexPath: IndexPath) -> ToDoListTaskViewCell.Configuration
@@ -29,12 +34,22 @@ protocol ToDoListPresenterProtocol: AnyObject {
 }
 
 final class ToDoListPresenter: ToDoListPresenterProtocol {
+    
+    // MARK: - Private Properties
 
-    weak var view: ToDoListViewProtocol?
+    private weak var view: ToDoListViewProtocol?
     private let interactor: ToDoListInteractorProtocol
     private let router: ToDoListRouter
     private var tasks: [ToDoListTaskViewCell.Configuration] = []
     private var filteredTasks: [ToDoListTaskViewCell.Configuration] = []
+    
+    // MARK: - Internal Properties
+    
+    var tasksCount: Int {
+        filteredTasks.count
+    }
+    
+    // MARK: - Initializers
 
     init(
         view: ToDoListViewProtocol,
@@ -45,14 +60,12 @@ final class ToDoListPresenter: ToDoListPresenterProtocol {
         self.interactor = interactor
         self.router = router
     }
-
-    var tasksCount: Int {
-        filteredTasks.count
-    }
+    
+    // MARK: - Internal Methods
 
     func viewDidLoad() {
         interactor.fetchTasks()
-        view?.setTitle("Задачи")
+        view?.setTitle(Constants.viewTitle)
     }
     
     func updateData() {
@@ -103,6 +116,8 @@ final class ToDoListPresenter: ToDoListPresenterProtocol {
     }
 }
 
+// MARK: - ToDoListPresenterOutput
+
 extension ToDoListPresenter: ToDoListPresenterOutput {
 
     func didFetchTasks(_ tasks: [ToDoTask]) {
@@ -145,4 +160,11 @@ extension ToDoListPresenter: ToDoListPresenterOutput {
             return "\(count) Задач"
         }
     }
+}
+
+// MARK: - Constants
+
+private enum Constants {
+    
+    static let viewTitle = "Задачи"
 }

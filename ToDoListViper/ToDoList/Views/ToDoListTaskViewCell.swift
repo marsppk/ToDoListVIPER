@@ -40,6 +40,7 @@ final class ToDoListTaskViewCell: UITableViewCell, Configurable {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
+        configireView()
         configureContainer()
         configureTaskInfoContainer()
         configureCompletionButton()
@@ -52,12 +53,14 @@ final class ToDoListTaskViewCell: UITableViewCell, Configurable {
         fatalError("init(coder:) has not been implemented")
     }
 
-    // MARK: - Internal Methods
+    // MARK: - Lifecycle
 
     override func prepareForReuse() {
         super.prepareForReuse()
         resetUI()
     }
+    
+    // MARK: - Internal Methods
 
     func apply(configuration: Configuration) {
         self.configuration = configuration
@@ -66,6 +69,11 @@ final class ToDoListTaskViewCell: UITableViewCell, Configurable {
     }
 
     // MARK: - Private Methods
+    
+    private func configireView() {
+        contentView.addSubview(container)
+        selectionStyle = .none
+    }
 
     private func configureContainer() {
         container.spacing = Constants.contentSpacing
@@ -73,7 +81,6 @@ final class ToDoListTaskViewCell: UITableViewCell, Configurable {
         container.alignment = .top
         container.distribution = .fill
 
-        contentView.addSubview(container)
         container.addArrangedSubview(completionButton)
         container.addArrangedSubview(taskInfoContainer)
 
