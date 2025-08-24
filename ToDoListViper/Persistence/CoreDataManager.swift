@@ -12,11 +12,20 @@ extension Notification.Name {
     static let didUpdateTask = Notification.Name("didUpdateTask")
 }
 
-final class CoreDataManager {
+protocol CoreDataManagerProtocol {
+    
+    func backgroundContext() -> NSManagedObjectContext
+    func saveTask(_ task: ToDoTask)
+    func fetchAllTasks() -> [ToDoTask]
+    func updateTask(_ task: ToDoTask)
+    func deleteTask(withId id: Int)
+}
+
+final class CoreDataManager: CoreDataManagerProtocol {
     
     // MARK: - Type Properties
 
-    static let shared = CoreDataManager()
+    static var shared: CoreDataManagerProtocol = CoreDataManager()
     
     // MARK: - Private Properties
     

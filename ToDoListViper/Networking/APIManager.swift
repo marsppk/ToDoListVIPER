@@ -7,11 +7,16 @@
 
 import Foundation
 
-final class APIManager: Sendable {
+protocol APIManagerProtocol: AnyObject {
+    
+    func getData<D: Decodable>(from endpoint: any Endpoint, completion: @escaping (Result<D?, Error>) -> Void)
+}
+
+final class APIManager: Sendable, APIManagerProtocol {
 
     typealias NetworkResponse = (data: Data, response: URLResponse)
 
-    static let shared = APIManager(baseURL: Constants.baseURL)
+    static var shared: APIManagerProtocol = APIManager(baseURL: Constants.baseURL)
     
     private let baseURL: String
     private let session = URLSession.shared

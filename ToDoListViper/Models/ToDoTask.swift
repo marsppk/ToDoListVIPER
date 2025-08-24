@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ToDoTask {
+struct ToDoTask: Equatable {
 
     // MARK: - Properties
 

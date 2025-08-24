@@ -32,6 +32,12 @@ final class ToDoListInteractor: ToDoListInteractorProtocol {
     
     weak var presenter: ToDoListPresenterOutput?
     
+    // MARK: - Initializers
+    
+    init(tasks: [ToDoTask] = []) {
+        self.tasks = tasks
+    }
+    
     // MARK: - Internal Methods
 
     func fetchTasks() {
@@ -49,6 +55,7 @@ final class ToDoListInteractor: ToDoListInteractorProtocol {
     }
 
     func updateTaskCompletion(at index: Int) {
+        guard index < tasks.count else { return }
         tasks[index].isCompleted = !tasks[index].isCompleted
         presenter?.didUpdateTask(task: tasks[index], at: index)
         backgroundContext.perform { [weak self] in
@@ -58,6 +65,7 @@ final class ToDoListInteractor: ToDoListInteractorProtocol {
     }
     
     func deleteTask(at index: Int) {
+        guard index < tasks.count else { return }
         let id = tasks.remove(at: index).id
         presenter?.didFetchTasks(tasks)
         backgroundContext.perform {
@@ -66,7 +74,7 @@ final class ToDoListInteractor: ToDoListInteractorProtocol {
     }
     
     func getCurrentTask(index: Int) -> ToDoTask? {
-        tasks[index]
+        index < tasks.count ? tasks[index] : nil
     }
     
     // MARK: - Private Methods
